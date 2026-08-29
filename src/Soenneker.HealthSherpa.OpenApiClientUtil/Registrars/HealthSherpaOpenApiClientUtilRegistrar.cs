@@ -13,6 +13,8 @@ public static class HealthSherpaOpenApiClientUtilRegistrar
     /// <summary>
     /// Adds <see cref="HealthSherpaOpenApiClientUtil"/> as a singleton service. <para/>
     /// </summary>
+    /// <param name="services">Service collection that receives the registration.</param>
+    /// <returns>The same service collection, so additional registrations can be chained.</returns>
     public static IServiceCollection AddHealthSherpaOpenApiClientUtilAsSingleton(this IServiceCollection services)
     {
         services.AddHealthSherpaOpenApiHttpClientAsSingleton()
@@ -24,6 +26,8 @@ public static class HealthSherpaOpenApiClientUtilRegistrar
     /// <summary>
     /// Adds <see cref="HealthSherpaOpenApiClientUtil"/> as a scoped service. <para/>
     /// </summary>
+    /// <param name="services">Service collection that receives the registration.</param>
+    /// <returns>The same service collection, so additional registrations can be chained.</returns>
     public static IServiceCollection AddHealthSherpaOpenApiClientUtilAsScoped(this IServiceCollection services)
     {
         services.AddHealthSherpaOpenApiHttpClientAsSingleton()
