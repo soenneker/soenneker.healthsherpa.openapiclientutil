@@ -1,10 +1,12 @@
 [![](https://img.shields.io/nuget/v/soenneker.healthsherpa.openapiclientutil.svg?style=for-the-badge)](https://www.nuget.org/packages/soenneker.healthsherpa.openapiclientutil/)
+[![](https://img.shields.io/github/actions/workflow/status/soenneker/soenneker.healthsherpa.openapiclientutil/build-and-test.yml?style=for-the-badge)](https://github.com/soenneker/soenneker.healthsherpa.openapiclientutil/actions/workflows/build-and-test.yml)
 [![](https://img.shields.io/github/actions/workflow/status/soenneker/soenneker.healthsherpa.openapiclientutil/publish-package.yml?style=for-the-badge)](https://github.com/soenneker/soenneker.healthsherpa.openapiclientutil/actions/workflows/publish-package.yml)
 [![](https://img.shields.io/nuget/dt/soenneker.healthsherpa.openapiclientutil.svg?style=for-the-badge)](https://www.nuget.org/packages/soenneker.healthsherpa.openapiclientutil/)
+[![](https://img.shields.io/github/actions/workflow/status/soenneker/soenneker.healthsherpa.openapiclientutil/codeql.yml?label=CodeQL&style=for-the-badge)](https://github.com/soenneker/soenneker.healthsherpa.openapiclientutil/actions/workflows/codeql.yml)
 
 # Soenneker.HealthSherpa.OpenApiClientUtil
 
-Exposes a cached OpenAPI client instance.
+Provides a lazily created HealthSherpa Kiota client over the shared HealthSherpa `HttpClient`.
 
 ## Install
 
@@ -12,31 +14,48 @@ Exposes a cached OpenAPI client instance.
 dotnet add package Soenneker.HealthSherpa.OpenApiClientUtil
 ```
 
-## Quick start
+## Configuration
+
+```json
+{
+  "HealthSherpa": {
+    "ApiKey": "<API key>"
+  }
+}
+```
+
+`ApiKey` is required. The client uses `https://api.one.healthsherpa.com` and sends the key in the `x-api-key` header by default. You can override `HealthSherpa:ClientBaseUrl`, `HealthSherpa:AuthHeaderName`, or `HealthSherpa:AuthHeaderValueTemplate`; use `{token}` in the value template where the API key belongs.
+
+## Register
 
 ```csharp
 using Soenneker.HealthSherpa.OpenApiClientUtil.Registrars;
-using Microsoft.Extensions.DependencyInjection;
 
-var services = new ServiceCollection();
-var result = services.AddHealthSherpaOpenApiClientUtilAsSingleton();
+services.AddHealthSherpaOpenApiClientUtilAsScoped();
 ```
 
-Adds `HealthSherpaOpenApiClientUtil` as a singleton service.
+The scoped registration deliberately keeps `IHealthSherpaOpenApiHttpClient` singleton. Disposing a scope releases that utility's generated-client wrapper without tearing down the long-lived HTTP client used by later scopes.
 
-## What you get
+Use `AddHealthSherpaOpenApiClientUtilAsSingleton()` when the generated-client wrapper should also live for the application lifetime.
 
-- `IHealthSherpaOpenApiClientUtil` — Exposes a cached OpenAPI client instance.
-- `HealthSherpaOpenApiClientUtilRegistrar` — Registers the OpenAPI client utility for dependency injection.
+## Usage
 
-## API at a glance
+```csharp
+using Soenneker.HealthSherpa.OpenApiClient;
+using Soenneker.HealthSherpa.OpenApiClient.Models;
+using Soenneker.HealthSherpa.OpenApiClientUtil.Abstract;
 
-| API | What it does | Result / important behavior |
-| --- | --- | --- |
-| `HealthSherpaOpenApiClientUtilRegistrar.AddHealthSherpaOpenApiClientUtilAsSingleton(services)` | Adds `HealthSherpaOpenApiClientUtil` as a singleton service. | The same service collection, so additional registrations can be chained. |
-| `HealthSherpaOpenApiClientUtilRegistrar.AddHealthSherpaOpenApiClientUtilAsScoped(services)` | Adds `HealthSherpaOpenApiClientUtil` as a scoped service. | The same service collection, so additional registrations can be chained. |
+public sealed class HealthSherpaService(IHealthSherpaOpenApiClientUtil clientUtil)
+{
+    public async Task<PingResponse?> Ping(CancellationToken cancellationToken)
+    {
+        HealthSherpaOpenApiClient client = await clientUtil.Get(cancellationToken);
 
-## Practical notes
+        return await client.V1.Ping.GetAsync(cancellationToken: cancellationToken);
+    }
+}
+```
 
-- Reuse the registered client instead of constructing one per operation.
-- Dispose instances you own when their scope ends so held resources can be released.
+Repeated and concurrent `Get()` calls on the same utility instance reuse its lazily initialized generated client. Cancellation affects first-time initialization; pass the token separately to generated request methods as shown above.
+
+Let the dependency-injection container dispose the utility. Do not dispose the shared `HttpClient` obtained by the lower-level package.

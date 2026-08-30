@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 namespace Soenneker.HealthSherpa.OpenApiClientUtil.Abstract;
 
 /// <summary>
-/// Exposes a cached OpenAPI client instance.
+/// Provides a lazily initialized HealthSherpa API client cached for the utility's lifetime.
 /// </summary>
-public interface IHealthSherpaOpenApiClientUtil: IDisposable, IAsyncDisposable
+public interface IHealthSherpaOpenApiClientUtil : IDisposable, IAsyncDisposable
 {
     /// <summary>
-    /// Returns the configured health Sherpa OpenAPI Client used by the Health Sherpa OpenAPI Client.
+    /// Gets the generated client configured to call the HealthSherpa API.
     /// </summary>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>A task whose result is the requested health Sherpa OpenAPI Client.</returns>
+    /// <param name="cancellationToken">Stops client initialization if the cached instance has not been created yet.</param>
+    /// <returns>The generated client cached for this utility's lifetime.</returns>
     ValueTask<HealthSherpaOpenApiClient> Get(CancellationToken cancellationToken = default);
 }
