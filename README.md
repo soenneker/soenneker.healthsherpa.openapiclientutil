@@ -58,4 +58,6 @@ public sealed class HealthSherpaService(IHealthSherpaOpenApiClientUtil clientUti
 
 Repeated and concurrent `Get()` calls on the same utility instance reuse its lazily initialized generated client. Cancellation affects first-time initialization; pass the token separately to generated request methods as shown above.
 
-Let the dependency-injection container dispose the utility. Do not dispose the shared `HttpClient` obtained by the lower-level package.
+Authentication is supplied by the underlying HTTP provider, so the Kiota adapter does not add a second `x-api-key` header.
+
+Let the service container dispose the utility. Do not dispose the shared `HttpClient` obtained by the lower-level package.
