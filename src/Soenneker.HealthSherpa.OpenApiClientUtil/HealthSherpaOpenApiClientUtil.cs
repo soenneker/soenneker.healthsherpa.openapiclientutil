@@ -11,6 +11,7 @@ using Soenneker.Utils.AsyncSingleton;
 
 namespace Soenneker.HealthSherpa.OpenApiClientUtil;
 
+/// <inheritdoc cref="IHealthSherpaOpenApiClientUtil" />
 public sealed class HealthSherpaOpenApiClientUtil : IHealthSherpaOpenApiClientUtil
 {
     private readonly AsyncSingleton<HealthSherpaOpenApiClient> _client;
