@@ -5,6 +5,7 @@ using Soenneker.HealthSherpa.HttpClients.Abstract;
 using Soenneker.HealthSherpa.OpenApiClientUtil.Abstract;
 using Soenneker.HealthSherpa.OpenApiClientUtil.Registrars;
 using Soenneker.Tests.HostedUnit;
+using System.Threading;
 
 namespace Soenneker.HealthSherpa.OpenApiClientUtil.Tests;
 
@@ -25,7 +26,7 @@ public sealed class HealthSherpaOpenApiClientUtilTests : HostedUnitTest
     }
 
     [Test]
-    public async ValueTask Scoped_utility_keeps_http_client_singleton()
+    public async ValueTask Scoped_utility_keeps_http_client_singleton(CancellationToken cancellationToken)
     {
         var services = new ServiceCollection();
 
