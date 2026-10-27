@@ -47,6 +47,6 @@
 
     <ItemGroup>
         <PackageReference Include="Soenneker.HealthSherpa.HttpClients" Version="11.0.92" />
-        <PackageReference Include="Soenneker.HealthSherpa.OpenApiClient" Version="11.0.37" />
+        <PackageReference Include="Soenneker.HealthSherpa.OpenApiClient" Version="11.0.38" />
     </ItemGroup>
 </Project>
